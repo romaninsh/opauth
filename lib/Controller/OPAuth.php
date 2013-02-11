@@ -90,6 +90,11 @@ class Controller_Opauth extends \AbstractController {
         // Login with user
         $this->owner->loginByID($user->id);
 
+        if ($user->hasMethod('registerWithOpauth')) {
+            $user->registerWithOpauth($this->model->id);
+        }
+
+
         return array('redirect'=>$this->register_page);
     }
 

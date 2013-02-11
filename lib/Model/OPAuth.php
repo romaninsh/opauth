@@ -2,7 +2,7 @@
 namespace romaninsh\opauth;
 
 class Model_Opauth extends \Model_Table {
-    public $table='opauth_opauth';
+    public $table='opauth';
 
     function init(){
         parent::init();
