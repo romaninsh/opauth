@@ -63,7 +63,7 @@ class Controller_Opauth extends \AbstractController {
         // Logged and authenticated into same account, do nothing.
         if ($this->model->loaded()
             && $this->owner->isLoggedIn()
-            && $this->owner->id == $this->model['user_id']
+            && $this->owner->model->id == $this->model['user_id']
         ) {
             return 'close';
         }
