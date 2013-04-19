@@ -7,6 +7,7 @@ class Controller_Opauth extends \AbstractController {
     public $root_page='/';
     public $register_page='/';  // set to page which would complete registartion
     public $startegies=array();
+    public $update_login_form=true;  // will add icons to login form
 
     function init(){
         parent::init();
@@ -19,12 +20,20 @@ class Controller_Opauth extends \AbstractController {
 
         $this->api->routePages('auth','romaninsh/opauth');
 
+        $this->owner->addHook('isPageAllowed',function($a,$page){
+            if(substr($page,0,4)=='auth')$a->breakHook(true);
+        });
+
+        $this->owner->allowPage('auth');
+
         $this->setModel($this->model_name);
         if(!$this->model->hasElement('user_id')){
             $this->model->hasOne( get_class($this->owner->model), 'user_id' );
         }
 
-        $this->owner->addHook(array('updateForm'),$this);
+        if($this->update_login_form){
+            $this->owner->addHook(array('updateForm'),$this);
+        }
     }
     /**
      * Implements reasonable strategy merging your account system with
@@ -36,7 +45,7 @@ class Controller_Opauth extends \AbstractController {
      */
     function callback($data, $opauth){
         // Load by auth token
-        $this->model->tryLoadBy('token',$x=$data['auth']['credentials']['token']);
+        $this->model->tryLoadBy('oauth_id',$x=$data['auth']['uid']);
 
         // Authentication found for a user. Perform manual login
         if ($this->model->loaded()
@@ -87,12 +96,12 @@ class Controller_Opauth extends \AbstractController {
         $this->model['user_id']=$user->id;
         $this->model->save();
 
+        if ($user->hasMethod('registerWithOpauth')) {
+            $user->registerWithOpauth($this->model);
+        }
+
         // Login with user
         $this->owner->loginByID($user->id);
-
-        if ($user->hasMethod('registerWithOpauth')) {
-            $user->registerWithOpauth($this->model->id);
-        }
 
 
         return array('redirect'=>$this->register_page);
