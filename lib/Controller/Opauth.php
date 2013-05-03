@@ -8,6 +8,7 @@ class Controller_Opauth extends \AbstractController {
     public $register_page='/';  // set to page which would complete registartion
     public $startegies=array();
     public $update_login_form=true;  // will add icons to login form
+    public $route_auth_page=true;    // if false - create your own page
 
     function init(){
         parent::init();
@@ -18,7 +19,9 @@ class Controller_Opauth extends \AbstractController {
 
         $this->owner->opauth=$this;
 
-        $this->api->routePages('auth','romaninsh/opauth');
+        if($this->route_auth_page){
+            $this->api->routePages('auth','romaninsh/opauth');
+        }
 
         $this->owner->addHook('isPageAllowed',function($a,$page){
             if(substr($page,0,4)=='auth')$a->breakHook(true);
@@ -92,13 +95,14 @@ class Controller_Opauth extends \AbstractController {
         }
 
         // Create new account
-        $user = $this->owner->model->save();
-        $this->model['user_id']=$user->id;
-        $this->model->save();
-
+        $user = $this->owner->model;
         if ($user->hasMethod('registerWithOpauth')) {
             $user->registerWithOpauth($this->model);
         }
+        $user->save();
+        $this->model['user_id']=$user->id;
+        $this->model->save();
+
 
         // Login with user
         $this->owner->loginByID($user->id);
