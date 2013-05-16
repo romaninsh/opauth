@@ -53,6 +53,10 @@ class page_index extends \Page {
             echo '<script>window.opener.location.reload(true);window.close()</script>';
             exit;
         }
+        if(isset($r['redirect_me'])){
+		header('Location: '.$r['redirect_me']);
+		exit;
+	}
         if(isset($r['redirect'])){
             echo '<script>window.opener.location="'.$this->api->url($r['redirect']).'";window.close()</script>';
             exit;
