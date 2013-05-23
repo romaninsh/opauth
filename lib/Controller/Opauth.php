@@ -135,13 +135,13 @@ class Controller_Opauth extends \AbstractController {
         $this->model['oauth_id']=$data['auth']['uid'];
         unset($data['auth']['uid']);
 
-        if ($this->model['timestamp']) {
+        if ($data['timestamp']) {
             $this->model['timestamp']
-                = date('Y-m-d H:i:s', strtotime($this->model['timestamp']));
+                = date('Y-m-d H:i:s', strtotime($data['timestamp']));
         }
-        if ($this->model['expires']) {
+        if ($data['expires']) {
             $this->model['expires']
-                = date('Y-m-d H:i:s', strtotime($this->model['expires']));
+                = date('Y-m-d H:i:s', strtotime($data['expires']));
         }
 
         if ($this->model->hasElement('raw_info')) {
