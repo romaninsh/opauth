@@ -173,8 +173,11 @@ class Controller_Opauth extends \AbstractController {
         $this->strategies[]=$strategies;
     }
     function updateForm($auth){
+        $form=($auth instanceof \Form)?
+            $auth:$auth->form;
+
         foreach($this->strategies as $strategy){
-            $b=$auth->form->add('View',null,'form_buttons')->setElement('img')
+            $b=$form->add('View',null,'form_buttons')->setElement('img')
                 ->setStyle('cursor','pointer')
                 ->setAttr(
                     'src',
