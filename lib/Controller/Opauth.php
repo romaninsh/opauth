@@ -9,6 +9,7 @@ class Controller_Opauth extends \AbstractController {
     public $startegies=array();
     public $update_login_form=true;  // will add icons to login form
     public $route_auth_page=true;    // if false - create your own page
+    public $redirect_style='redirect';  // either redirect, or redirect_me
 
     function init(){
         parent::init();
@@ -56,7 +57,7 @@ class Controller_Opauth extends \AbstractController {
             && $this->model['user_id']
         ) {
             $this->owner->loginByID($this->model['user_id']);
-            return array('redirect'=>$this->root_page);
+            return array($this->redirect_style=>$this->root_page);
         }
 
         // Logged and authenticated. Bind token to current user.
@@ -69,7 +70,7 @@ class Controller_Opauth extends \AbstractController {
 
             $this->owner->logout();
             //$this->owner->loginByID($this->model['user_id']);
-            return array('redirect'=>$this->root_page);
+            return array($this->redirect_style=>$this->root_page);
         }
 
         // Logged and authenticated into same account, do nothing.
@@ -108,7 +109,7 @@ class Controller_Opauth extends \AbstractController {
         $this->owner->loginByID($user->id);
 
 
-        return array('redirect'=>$this->register_page);
+        return array($this->redirect_style=>$this->register_page);
     }
 
     function collectInfo($data){

@@ -4,15 +4,7 @@ class page_index extends \Page {
     function init(){
         parent::init();
 
-        /*
-        if($_GET['close']){
-            $this->memorize('result','close');
-        }elseif($_GET['redirect']){
-            $this->memorize('result',array('redirect'=>$_GET['redirect']));
-        }elseif($_GET['dump']){
-            $this->memorize('result','dump');
-        }
-         */
+        $this->op=$this->api->auth->opauth;
 
         $config=$this->api->getConfig('opauth');
 
@@ -29,34 +21,40 @@ class page_index extends \Page {
         $this->config=$config;
 
     }
+
     function page_callback(){
+        $r=$this->op->recall('result',null);
+        $this->op->forget('result');
         $this->opauth = new \Opauth($this->config,false);
         $response = $_SESSION['opauth'];
 
         // Controller_Opauth or it's descendand (which you can tweak)
         // will determine, what should be done upon successful initialization.
         // See documentation of 
+
         if($this->api->auth->opauth){
-            $r = $this->api->auth->opauth->callback($response, $this->opauth);
+            $r = $r?:$this->op->callback($response, $this->opauth);
         }else {
-            $r='close';
+            $r = $r?:'close';
         }
 
 
-       // $r=$this->recall('result',null);
-        if($r=='dump'){
+        if($r==='dump'){
             echo "<pre>";
             var_Dump($response);
             exit;
         }
-        if($r=='close'){
+        if($r==='close'){
             echo '<script>window.opener.location.reload(true);window.close()</script>';
             exit;
         }
         if(isset($r['redirect_me'])){
-		header('Location: '.$r['redirect_me']);
-		exit;
-	}
+            if($r['redirect_me']['0']=='/'){
+                header('Location: '.$r['redirect_me']);
+                exit;
+            }
+            $this->api->redirect($r['redirect_me']);
+        }
         if(isset($r['redirect'])){
             echo '<script>window.opener.location="'.$this->api->url($r['redirect']).'";window.close()</script>';
             exit;
@@ -66,6 +64,26 @@ class page_index extends \Page {
     }
     // Enables catch-all for all sub-pages, then send them for authentication
     function subPageHandler(){
+
+        if($_GET['close']){
+            $this->op->memorize('result','close');
+        }elseif($_GET['redirect']){
+            $this->op->memorize('result',array('redirect'=>$_GET['redirect']));
+        }elseif($_GET['redirect_me']){
+            $this->op->memorize('result',array('redirect_me'=>$_GET['redirect_me']));
+        }elseif($_GET['dump']){
+            $this->op->memorize('result','dump');
+        }else{
+           // $this->op->forget('result');
+        }
+        /*
+        echo "<pre>";
+        var_Dump($_SESSION);
+        exit;
+        /* */
+
+
+
         $this->opauth = new \Opauth($this->config);
     }
 }
