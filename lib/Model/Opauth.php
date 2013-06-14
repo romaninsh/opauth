@@ -8,14 +8,14 @@ class Model_Opauth extends \Model_Table {
         parent::init();
 
         $this->addField('provider')->caption('OPauth provider');
-        $this->addField('oauth_id')->caption('Remote User ID');
+        $this->addField('oauth_id')->caption('Remote User ID')->mandatory(true);
 
         // field user_id will be added by your controller, which will
         // be used to tie authentication to the users. You can also
         // extend this model and add the field yourself.
 
         // Credentials
-        $this->addField('token');
+        $this->addField('token')->mandatory(true);
         $this->addField('expires');
         $this->addField('secret');
 
