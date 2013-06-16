@@ -35,11 +35,12 @@ class page_index extends \Page {
         if($this->api->auth->opauth){
             $r = $r?:$this->op->callback($response, $this->opauth);
         }else {
-            $r = $r?:'close';
+            $r = $r?:'dump';
         }
 
 
         if($r==='dump'){
+            echo '<h2>default_action is not specified fo OPauth Controller. Dumping...</h2>';
             echo "<pre>";
             var_Dump($response);
             exit;
