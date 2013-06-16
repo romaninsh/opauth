@@ -50,7 +50,7 @@ class page_index extends \Page {
             exit;
         }
         if(isset($r['redirect_me'])){
-            if($r['redirect_me']['0']=='/'){
+            if($r['redirect_me']['0']=='/' && strlen($r['redirect_me'])!=1){
                 header('Location: '.$r['redirect_me']);
                 exit;
             }
