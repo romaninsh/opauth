@@ -50,6 +50,7 @@ class Controller_Opauth extends \AbstractController {
      */
     function callback($data, $opauth){
         // Load by auth token
+        if(!$data['auth']['uid'])return array('error'=>$data['error']['raw']['error_message']);
         $this->model->tryLoadBy('oauth_id',$x=$data['auth']['uid']);
 
         // Authentication found for a user. Perform manual login
