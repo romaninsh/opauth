@@ -36,27 +36,33 @@ class page_index extends \Page {
             $res = $this->op->callback($response, $this->opauth);
             $r=$r?:$res;
         }else {
-            $r = $r?:'close';
+            $r = $r?:'dump';
         }
 
 
         if($r==='dump'){
+            echo '<h2>default_action is not specified fo OPauth Controller. Dumping...</h2>';
             echo "<pre>";
             var_Dump($response);
+            exit;
+        }
+        if(is_array($r) && isset($r['error'])){
+            echo '<h2>Unable to authenticate</h2>';
+            echo "<p>".htmlspecialchars($r['error'])."</p>";
             exit;
         }
         if($r==='close'){
             echo '<script>window.opener.location.reload(true);window.close()</script>';
             exit;
         }
-        if(isset($r['redirect_me'])){
-            if($r['redirect_me']['0']=='/'){
+        if(is_array($r) && isset($r['redirect_me'])){
+            if($r['redirect_me']['0']=='/' && strlen($r['redirect_me'])!=1){
                 header('Location: '.$r['redirect_me']);
                 exit;
             }
             $this->api->redirect($r['redirect_me']);
         }
-        if(isset($r['redirect'])){
+        if(is_array($r) && isset($r['redirect'])){
             echo '<script>window.opener.location="'.$this->api->url($r['redirect']).'";window.close()</script>';
             exit;
         }

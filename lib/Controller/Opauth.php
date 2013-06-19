@@ -10,6 +10,7 @@ class Controller_Opauth extends \AbstractController {
     public $update_login_form=true;  // will add icons to login form
     public $route_auth_page=true;    // if false - create your own page
     public $redirect_style='redirect';  // either redirect, or redirect_me
+    public $default_action='dump';   // what to do when authenticated? redirect,close,dump
 
     function init(){
         parent::init();
@@ -49,6 +50,7 @@ class Controller_Opauth extends \AbstractController {
      */
     function callback($data, $opauth){
         // Load by auth token
+        if(!$data['auth']['uid'])return array('error'=>$data['error']['raw']['error_message']);
         $this->model->tryLoadBy('oauth_id',$x=$data['auth']['uid']);
 
         // Authentication found for a user. Perform manual login
@@ -89,7 +91,11 @@ class Controller_Opauth extends \AbstractController {
             && $this->owner->isLoggedIn()
             && $this->owner->model->id == $this->model['user_id']
         ) {
-            return 'close';
+            $user = $this->owner->model;
+            if ($user->hasMethod('relinkExistingOpauth')) {
+                $user->relinkExistingOpauth($this->model);
+            }
+            return $this->default_action;
         }
 
         // Either model not loaded, or useless for us
@@ -98,16 +104,21 @@ class Controller_Opauth extends \AbstractController {
         }
 
         $this->collectInfo($data);
+        $user = $this->owner->model;
 
         // Already logged, associate with this account
         if ($this->owner->isLoggedIn()) {
             $this->model['user_id']=$this->owner->model->id;
             $this->model->save();
-            return 'close';
+
+            if ($user->hasMethod('linkExistingOpauth')) {
+                $user->linkExistingOpauth($this->model);
+            }
+
+            return $this->default_action;
         }
 
         // Create new account
-        $user = $this->owner->model;
         if ($user->hasMethod('registerWithOpauth')) {
             $user->registerWithOpauth($this->model);
         }
