@@ -33,7 +33,8 @@ class page_index extends \Page {
         // See documentation of 
 
         if($this->api->auth->opauth){
-            $r = $r?:$this->op->callback($response, $this->opauth);
+            $res = $this->op->callback($response, $this->opauth);
+            $r=$r?:$res;
         }else {
             $r = $r?:'close';
         }

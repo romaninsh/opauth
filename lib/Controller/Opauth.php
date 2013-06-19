@@ -66,11 +66,22 @@ class Controller_Opauth extends \AbstractController {
             && $this->owner->model->id != $this->model['user_id']
         ) {
 
-            // TODO: think, perhaps it's better to show error here!?
+            if($this->model['user_id']){
 
-            $this->owner->logout();
+                // TODO: think, perhaps it's better to show error here!?
+                throw $this->exception('This social account is already associated
+                    with different user');
+            }
+
+
+            $this->model['user_id']=$this->owner->model->id;
+            $this->model->save();
+            return 'close';
+
+            // continue with regular flow
+            //
+            //
             //$this->owner->loginByID($this->model['user_id']);
-            return array($this->redirect_style=>$this->root_page);
         }
 
         // Logged and authenticated into same account, do nothing.
