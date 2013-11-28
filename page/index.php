@@ -15,9 +15,9 @@ class page_index extends \Page {
         ).'/';
         $config['callback_url']=(string)$this->api->url('auth/callback');
         $config['security_salt']=$this->learn('salt', uniqid());
-        // memorize will also initialize session, so that Opauth is not 
+        // memorize will also initialize session, so that Opauth is not
         // confused
-        
+
         $this->config=$config;
 
     }
@@ -30,15 +30,17 @@ class page_index extends \Page {
 
         // Controller_Opauth or it's descendand (which you can tweak)
         // will determine, what should be done upon successful initialization.
-        // See documentation of 
+        // See documentation of
 
         if($this->api->auth->opauth){
             $res = $this->op->callback($response, $this->opauth);
-            $r=$r?:$res;
+            if(is_array($res) && isset($res['force_callback']) && $res['force_callback'])
+                $r=$res;
+            else
+                $r=$r?:$res;
         }else {
             $r = $r?:'dump';
         }
-
 
         if($r==='dump'){
             echo '<h2>default_action is not specified fo OPauth Controller. Dumping...</h2>';
@@ -64,6 +66,10 @@ class page_index extends \Page {
         }
         if(is_array($r) && isset($r['redirect'])){
             echo '<script>window.opener.location="'.$this->api->url($r['redirect']).'";window.close()</script>';
+            exit;
+        }
+        if(is_array($r) && isset($r['custom_script'])){
+            echo $r['custom_script'];
             exit;
         }
 
