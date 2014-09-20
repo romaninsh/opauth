@@ -15,42 +15,51 @@ class Controller_Opauth extends \AbstractController {
     function init(){
         parent::init();
 
+        // Verify to make sure this controller is used properly
         if (!($this->owner instanceof \Auth_Basic)) {
             throw $this->exception('Opauth controller must be added into Auth');
         }
 
         $this->owner->opauth=$this;
 
+        // creates a page "auth/<strategy>" which will automatically log user in
         if($this->route_auth_page){
             $this->api->routePages('auth','romaninsh/opauth');
         }
 
+        // Make sure that our "authenticatino pages" are not blocked by auth->check()
         $this->owner->addHook('isPageAllowed',function($a,$page){
             if(substr($page,0,4)=='auth')$a->breakHook(true);
         });
 
         $this->owner->allowPage('auth');
 
+        // We will store tokens in this model, once authenticated
         $this->setModel($this->model_name);
+
+        // Make sure that OPauth model is related to the user model
         if(!$this->model->hasElement('user_id')){
             $this->model->hasOne( get_class($this->owner->model), 'user_id' );
         }
 
+        // We want to put icon on the login form for all allowed strategies
         if($this->update_login_form){
             $this->owner->addHook(array('updateForm'),$this);
         }
     }
+
     /**
      * Implements reasonable strategy merging your account system with
      * external authentication. Redefine this method, but do not
-     * manually call it.
+     * manually call it. It will be called after user returns back
+     * from 3rd party login.
      *
      * @param array  $data   Response from Opauth
      * @param object $opauth Opauth object in case you want it
      */
     function callback($data, $opauth){
         // Load by auth token
-        if(!$data['auth']['uid'])return array('error'=>$data['error']['raw']['error_message']);
+        if(!$data['auth']['uid'])return array('error'=>$data['error']['raw']);
         $this->model->tryLoadBy('oauth_id',$x=$data['auth']['uid']);
 
         // Authentication found for a user. Perform manual login
@@ -142,13 +151,13 @@ class Controller_Opauth extends \AbstractController {
                 'name','email','image','nickname','location'
             ) as $key
         ) {
-            $this->model[$key] = 
+            $this->model[$key] =
                 @$data['auth']['credentials'][$key]
                 ?: $data[$key]
                 ?: $data['auth'][$key]
                 ?: $data['auth']['info'][$key]
                 ;
-            unset($data['auth']['credentials'][$key], 
+            unset($data['auth']['credentials'][$key],
                 $data[$key],
                 $data['auth'][$key],
                 $data['auth']['info'][$key]
