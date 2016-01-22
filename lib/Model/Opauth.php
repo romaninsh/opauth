@@ -24,6 +24,7 @@ class Model_Opauth extends \Model_Table {
 
 
         $this->addField('name');
+        $this->addField('email');
         $this->addField('image');
         $this->addField('nickname');
         $this->addField('location');
