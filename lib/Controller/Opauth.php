@@ -189,7 +189,7 @@ class Controller_Opauth extends \AbstractController {
         return $this->api->js()->univ()->newWindow(
             $this->api->url('auth/'.$strategy,array('close'=>1)),
             'auth_'.$strategy,
-            'width=600,height=300'
+            'width=700,height=600'
         );
     }
     function addStrategy($strategies){
